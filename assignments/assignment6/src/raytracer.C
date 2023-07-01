@@ -147,6 +147,7 @@ Vec3f RayTracer::RayCastFast(Ray &ray, float tmin, int bounces, float weight, Hi
         {
             Hit hit_ref(INFINITY, nullptr, Vec3f(0, 0, 0));
             color += attenuation * RayCastFast(scattered, tmin, bounces + 1, weight * attenuation.Length(), hit_ref);
+            // printf("hi here\n");
             RayTree::AddTransmittedSegment(scattered, tmin, hit_ref.getT());
         }
         return color;
