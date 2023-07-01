@@ -1,0 +1,18 @@
+#include "group.h"
+
+bool Group::intersect(const Ray &r, Hit &h, float tmin)
+{
+    bool is_intersect = false;
+    for (int i = 0; i < num_obj; i++) {
+        if (objects[i]->intersect(r, h, tmin)) {
+            is_intersect = true;
+        }
+    }
+    return is_intersect;
+}
+
+void Group::addObject(int index, Object3D *obj)
+{
+    assert(index >= 0 && index < num_obj);
+    objects[index] = obj;
+}

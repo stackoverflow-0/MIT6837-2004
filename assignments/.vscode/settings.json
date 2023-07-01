@@ -1,0 +1,19 @@
+{
+    "files.associations": {
+        "main.C": "cpp",
+        "image.C": "cpp",
+        "ifs.C": "cpp",
+        "matrix.C": "cpp",
+        "random": "cpp",
+        "scene_parser.C": "cpp",
+        "camera.C": "cpp",
+        "ray_tracer.C": "cpp",
+        "sphere.C": "cpp",
+        "group.C": "cpp",
+        "raytracer.C": "cpp",
+        "new": "cpp",
+        "plane.C": "cpp",
+        "triangle.C": "cpp",
+        "transform.C": "cpp"
+    }
+}

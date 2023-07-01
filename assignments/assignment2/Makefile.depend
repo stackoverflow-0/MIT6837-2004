@@ -1,0 +1,13 @@
+
+-M
+src/main.C
+src/matrix.C
+src/image.C
+src/scene_parser.C
+src/sphere.C
+src/plane.C
+src/triangle.C
+src/transform.C
+src/raytracer.C
+src/camera.C
+src/group.C

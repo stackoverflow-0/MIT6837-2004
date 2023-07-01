@@ -1,0 +1,17 @@
+
+-M
+src/main.C
+src/matrix.C
+src/image.C
+src/scene_parser.C
+src/sphere.C
+src/triangle.C
+src/plane.C
+src/transform.C
+src/group.C
+src/material.C
+src/raytracer.C
+src/light.C
+src/camera.C
+src/rayTree.C
+src/glCanvas.C

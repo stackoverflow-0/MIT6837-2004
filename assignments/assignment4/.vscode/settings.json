@@ -1,0 +1,21 @@
+{
+    "files.associations": {
+        "main.C": "cpp",
+        "triangle.C": "cpp",
+        "camera.C": "cpp",
+        "material.C": "cpp",
+        "glCanvas.C": "cpp",
+        "light.C": "cpp",
+        "scene_parser.C": "cpp",
+        "new": "cpp",
+        "raytracer.C": "cpp",
+        "object3d.h": "c",
+        "ray.h": "c",
+        "vectors.h": "c",
+        "sphere.C": "cpp",
+        "group.C": "cpp",
+        "transform.C": "cpp",
+        "plane.C": "cpp",
+        "image.C": "cpp"
+    }
+}

@@ -1,0 +1,16 @@
+{
+    "files.associations": {
+        "sphere.C": "cpp",
+        "triangle.C": "cpp",
+        "cmath": "cpp",
+        "plane.C": "cpp",
+        "matrix.C": "cpp",
+        "image.C": "cpp",
+        "group.C": "cpp",
+        "camera.C": "cpp",
+        "raytracer.C": "cpp",
+        "transform.C": "cpp",
+        "main.C": "cpp",
+        "scene_parser.C": "cpp"
+    }
+}
