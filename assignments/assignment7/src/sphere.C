@@ -1,7 +1,12 @@
 #include "sphere.h"
+#include "grid.h"
+#include "vectors.h"
 #include <vector>
-bool Sphere::intersect(const Ray &r, Hit &h, float tmin)
-{
+#include "raytracing_stats.h"
+
+
+bool Sphere::intersect(const Ray &r, Hit &h, float tmin) {
+    RayTracingStats::IncrementNumIntersections();//-------------------------------------
     Vec3f orig = r.getOrigin() - center;
     Vec3f dir = r.getDirection();
     float a = dir.Dot3(dir);
@@ -28,10 +33,7 @@ bool Sphere::intersect(const Ray &r, Hit &h, float tmin)
     return false;
 }
 
-extern int theta_steps;
-extern int phi_steps;
-extern bool gouraud;
-const float PI = 3.14159265358979323846;
+
 
 void Sphere::paint() const
 {
@@ -49,7 +51,7 @@ void Sphere::paint() const
             float phi = p * dp;
             Vec3f pos = Vec3f(sin(phi) * cos(theta), cos(phi), sin(phi) * sin(theta));
             position.push_back(center + pos * radius);
-            normal.push_back(pos);
+            normal.push_back( -1 * pos);
         }
     }
     glBegin(GL_QUADS);
@@ -81,4 +83,42 @@ void Sphere::paint() const
         }
     }
     glEnd();
+}
+
+
+void Sphere::insertIntoGrid(Grid *g, Matrix *m) {
+    cout << "inset sphere\n";
+    if (m) {
+        Object3D::insertIntoGrid(g, m);
+        return;
+    }
+    // no trans matrix - 0,0,0
+    BoundingBox *grid_bb = g->getBoundingBox();
+    assert(grid_bb != nullptr);
+    
+    // grid_bb->Extend(bdBox);
+    Vec3f grid_min = grid_bb->getMin();
+    Vec3f grid_max = grid_bb->getMax();
+
+    int nx = g->nx;
+    int ny = g->ny;
+    int nz = g->nz;
+    float cellx = (grid_max - grid_min).x() / float(nx);
+    float celly = (grid_max - grid_min).y() / float(ny);
+    float cellz = (grid_max - grid_min).z() / float(nz);
+    float diagonal = sqrt(cellx * cellx + celly * celly + cellz * cellz);
+    for (int k = 0; k < nz; ++k) {
+        for (int j = 0; j < ny; ++j) {
+            for (int i = 0; i < nx; ++i) {
+                float x = (i + 0.5) * cellx;
+                float y = (j + 0.5) * celly;
+                float z = (k + 0.5) * cellz;
+                if ((Vec3f(x, y, z) - (center - grid_min)).Length() < radius + diagonal / 2) {
+                    int index = nx * ny * k + nx * j + i;
+                    // cout << "inset sphere to opaque\n";
+                    g->opaque[index].push_back(this);
+                }
+            }
+        }
+    }
 }
