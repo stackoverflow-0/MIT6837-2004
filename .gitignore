@@ -2,4 +2,5 @@
 *.o
 *.tga
 *.txt
+Makefile.depend
 raytracer

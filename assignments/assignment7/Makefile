@@ -25,7 +25,8 @@ SRCS 	 	= src/main.C \
 		  src/marchinfo.C \
 		  src/raytracing_stats.C \
 		  src/perlin_noise.C \
-		  src/film.C
+		  src/film.C \
+		  src/filter.C
 
 # ===============================================================
 # NOTE:  On athena, the Mesa GL libraries are currently located in the
