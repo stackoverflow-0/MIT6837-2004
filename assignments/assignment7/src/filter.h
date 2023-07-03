@@ -81,7 +81,7 @@ public:
 
     virtual float getWeight(float x, float y);
 
-    virtual int getSupportRadius() { return int(radius); }
+    virtual int getSupportRadius() { return radius; }
 
 private:
     float sigma{1.0f};

@@ -4,6 +4,8 @@
 #include <assert.h>
 
 #include "raytracer.h"
+#include "film.h"
+#include "sampler.h"
 
 void render(void);
 void RayTraceRender(float x, float y);
@@ -32,6 +34,13 @@ bool visualize_grid = false;
 int nx = 0, ny = 0, nz = 0;
 
 bool stats = false;
+
+bool render_samples = false;
+char *render_sample_file = nullptr;
+int sample_zoom = 1;
+
+SamplerType samplerType = SamplerType::uniform;
+int sample_num = 1;
 
 RayTracer *rayTracer = nullptr;
 
@@ -87,6 +96,28 @@ void render(void)
     image.SetAllPixels(scene->getBackgroundColor());
     Camera *camera = scene->getCamera();
 
+    Sampler *sampler = nullptr;
+
+    switch (samplerType)
+    {
+    case SamplerType::uniform:
+        /* code */
+        sampler = new UniormSampler(sample_num);
+        break;
+    case SamplerType::random:
+        /* code */
+        sampler = new RandomSampler(sample_num);
+        break;
+    case SamplerType::jitterd:
+        /* code */
+        sampler = new JitterdSampler(sample_num);
+        break;
+    default:
+        break;
+    }
+
+    Film film(width, height, 5);
+
     // RayTracer rayTracer(scene, max_bounces, cutoff_weight);
     if (nx != 0)
         RayTracingStats::Initialize(width, height, rayTracer->getGrid()->getBoundingBox(), nx, ny, nz);
@@ -97,29 +128,36 @@ void render(void)
 
     for (int i = 0; i < width; ++i)
     {
-        if(i % 100 == 0) {
-            printf("at %.2f ... \n", float(i)/float(width) * 100);
+        if (i % 100 == 0)
+        {
+            printf("at %.2f ... \n", float(i) / float(width) * 100);
         }
         for (int j = 0; j < height; ++j)
         {
-            
-            RayTracingStats::IncrementNumNonShadowRays();
-            float x = float(i) / float(width);
-            float y = (float(j) / float(height) + 1 - 1/frac) / frac;
-            Ray ray = camera->generateRay(Vec2f(x, y));
-            float tmin = 0.001f;
-            Hit hit(INFINITY, nullptr, Vec3f(0, 0, 0));
-            Vec3f color = rayTracer->traceRay(ray, tmin, 0, 1.0, hit);
-            image.SetPixel(i, j, color);
-            
+            for (int s = 0; s < film.getNumSamples(); ++s)
+            {
+                RayTracingStats::IncrementNumNonShadowRays();
+                Vec2f random_offset = sampler->getSamplePosition(s);
+                float x = float(i + random_offset.x()) / float(width);
+                float y = (float(j + random_offset.y()) / float(height) + 1 - 1 / frac) / frac;
+                Ray ray = camera->generateRay(Vec2f(x, y));
+                float tmin = 0.001f;
+                Hit hit(INFINITY, nullptr, Vec3f(0, 0, 0));
+                Vec3f color = rayTracer->traceRay(ray, tmin, 0, 1.0, hit);
+                film.setSample(x, y, s, random_offset, color);
+                // image.SetPixel(i, j, color);
+            }
         }
     }
-    // printf("here\n");
-    if (output_file != nullptr)
-        image.SaveTGA(output_file);
+    if (render_samples)
+        film.renderSamples(render_sample_file, sample_zoom);
+    // if (output_file != nullptr)
+    //     image.SaveTGA(output_file);
 
     if (stats)
         RayTracingStats::PrintStatistics();
+
+    delete sampler;
 }
 
 void parser(int argc, char **argv)
@@ -188,6 +226,8 @@ void parser(int argc, char **argv)
         }
         else if (!strcmp(argv[i], "-gouraud"))
         {
+            i++;
+            assert(i < argc);
             gouraud = true;
         }
         else if (!strcmp(argv[i], "-bounces"))
@@ -216,11 +256,42 @@ void parser(int argc, char **argv)
         }
         else if (!strcmp(argv[i], "-visualize_grid"))
         {
+            i++;
+            assert(i < argc);
             visualize_grid = true;
         }
         else if (!strcmp(argv[i], "-stats"))
         {
+            i++;
+            assert(i < argc);
             stats = true;
+        }
+        else if (!strcmp(argv[i], "-render_samples"))
+        {
+            i++;
+            assert(i < argc);
+            render_sample_file = argv[i];
+            i++;
+            assert(i < argc);
+            sample_zoom = atoi(argv[i]);
+        }
+        else if (!strcmp(argv[i], "-random_samples"))
+        {
+            i++;
+            assert(i < argc);
+            samplerType = SamplerType::random;
+        }
+        else if (!strcmp(argv[i], "-uniform_samples"))
+        {
+            i++;
+            assert(i < argc);
+            samplerType = SamplerType::uniform;
+        }
+        else if (!strcmp(argv[i], "-jittered_samples"))
+        {
+            i++;
+            assert(i < argc);
+            samplerType = SamplerType::jitterd;
         }
     }
 }
