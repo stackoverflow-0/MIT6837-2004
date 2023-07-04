@@ -16,6 +16,13 @@ public:
         vertexs.resize(num_vertices);
     }
 
+    void set(int i, const Vec3f &v)
+    {
+        // cout << "i & n : " << i << " "<< num_vertices << endl;
+        // assert(i < num_vertices);
+        vertexs[i] = v;
+    }
+
     // FOR VISUALIZATION
     virtual void Paint(ArgParser *args);
 
@@ -49,7 +56,7 @@ public:
     virtual TriangleMesh *OutputTriangles(ArgParser *args);
 
 private:
-    void drawCurvs(ArgParser *args);
+    void drawCurves(ArgParser *args);
 };
 
 class BSplineCurve : public Curve
@@ -63,5 +70,5 @@ public:
     virtual TriangleMesh *OutputTriangles(ArgParser *args);
 
 private:
-    void drawCurvs(ArgParser *args);
+    void drawCurves(ArgParser *args);
 };

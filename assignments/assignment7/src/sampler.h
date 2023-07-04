@@ -39,6 +39,7 @@ public:
     virtual Vec2f getSamplePosition(int n)
     {
         int sample_side = sqrt(sample_num);
+        n  = n % (sample_side * sample_side);
         int xoffset = n / sample_side;
         int yoffset = n % sample_side;
         float step = 1.0f / sample_side;

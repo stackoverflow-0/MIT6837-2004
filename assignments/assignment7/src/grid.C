@@ -360,7 +360,7 @@ PhongMaterial *Grid::getMtl(int i) const
 
 bool Grid::intersectShadowRay(const Ray &r, Hit &hit, float tmin)
 {
-    // is_intersected.clear();
+    is_intersected.clear();
     MarchingInfo mi;
     initializeRayMarch(mi, r, tmin);
     // cout << "not empty : " << cnt << endl;
@@ -390,6 +390,9 @@ bool Grid::intersectShadowRay(const Ray &r, Hit &hit, float tmin)
                     {
                         return true;
                     }
+                    // if(obj->intersect(r, hit, tmin)) {
+                    //     return true;
+                    // }
                     // is_intersected.insert(obj);
                     // else
                     //     return true;

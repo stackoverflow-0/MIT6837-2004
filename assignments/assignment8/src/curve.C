@@ -5,8 +5,8 @@
 void Curve::Paint(ArgParser *args)
 {
     drawLines();
-    drawPoints();
     drawCurves(args);
+    drawPoints();
 }
 void Curve::drawLines()
 {
@@ -27,7 +27,7 @@ void Curve::drawPoints()
 {
     glPointSize(6);
     glColor3f(1, 0, 0);
-    glBegin(GL_POINT);
+    glBegin(GL_POINTS);
 
     for (auto v : vertexs)
     {
@@ -105,11 +105,11 @@ TriangleMesh *BezierCurve::OutputTriangles(ArgParser *args)
 
     int revolution_tessellation = args->revolution_tessellation;
 
-    float d_revo = 1.0f / float(revolution_tessellation);
+    float d_revo = 2.0 * M_PI / float(revolution_tessellation);
 
-    TriangleNet *triangleNet = new TriangleNet(revolution_tessellation, (num_vertices - 3) * curve_tessellation);
+    TriangleNet *triangleNet = new TriangleNet(revolution_tessellation, num_vertices / 3 *  curve_tessellation);
 
-    for (int i = 0; i < num_vertices; i += 3)
+    for (int i = 0; i < num_vertices - 3; i += 3)
     {
         Matrix G;
         for (int j = 0; j < 4; j++)
@@ -119,7 +119,7 @@ TriangleMesh *BezierCurve::OutputTriangles(ArgParser *args)
             G.Set(j, 2, getVertex(i + j).z());
         }
         float t = 0;
-        for (int k = 0; k < curve_tessellation; k++)
+        for (int k = 0; k <= curve_tessellation; k++)
         {
             float t2 = t * t;
             float t3 = t * t2;
@@ -127,13 +127,15 @@ TriangleMesh *BezierCurve::OutputTriangles(ArgParser *args)
             B_bezier.Transform(tvec);
             G.Transform(tvec);
             float theta = 0;
-            for (int n = 0; n < revolution_tessellation; n++)
+            for (int n = 0; n <= revolution_tessellation; n++)
             {
                 float x = cos(theta) * tvec.x() + sin(theta) * tvec.z();
                 float y = tvec.y();
                 float z = -sin(theta) * tvec.x() + cos(theta) * tvec.z();
 
-                triangleNet->SetVertex(n, k + i * curve_tessellation, Vec3f(x, y, z));
+                triangleNet->SetVertex(n, k + i / 3 * curve_tessellation, Vec3f(x, y, z));
+
+                theta += d_revo;
             }
             t += d_curve;
         }
@@ -141,7 +143,7 @@ TriangleMesh *BezierCurve::OutputTriangles(ArgParser *args)
     return triangleNet;
 }
 
-void BezierCurve::drawCurvs(ArgParser *args)
+void BezierCurve::drawCurves(ArgParser *args)
 {
     glLineWidth(4);
     glColor3f(0, 1, 0);
@@ -152,7 +154,7 @@ void BezierCurve::drawCurvs(ArgParser *args)
 
     float d = 1.0f / tessellation;
 
-    for (int i = 0; i < num_vertices; i += 3)
+    for (int i = 0; i < num_vertices - 3; i += 3)
     {
         Matrix G;
         for (int j = 0; j < 4; j++)
@@ -162,7 +164,7 @@ void BezierCurve::drawCurvs(ArgParser *args)
             G.Set(j, 2, getVertex(i + j).z());
         }
         float t = 0;
-        for (int k = 0; k < num_vertices; k++)
+        for (int k = 0; k <= tessellation; k++)
         {
             float t2 = t * t;
             float t3 = t * t2;
@@ -212,11 +214,11 @@ TriangleMesh *BSplineCurve::OutputTriangles(ArgParser *args)
 
     int revolution_tessellation = args->revolution_tessellation;
 
-    float d_revo = 1.0f / float(revolution_tessellation);
+    float d_revo = 2.0f * M_PI / float(revolution_tessellation);
 
     TriangleNet *triangleNet = new TriangleNet(revolution_tessellation, (num_vertices - 3) * curve_tessellation);
 
-    for (int i = 0; i < num_vertices; i += 3)
+    for (int i = 0; i < num_vertices - 3; i++)
     {
         Matrix G;
         for (int j = 0; j < 4; j++)
@@ -226,7 +228,7 @@ TriangleMesh *BSplineCurve::OutputTriangles(ArgParser *args)
             G.Set(j, 2, getVertex(i + j).z());
         }
         float t = 0;
-        for (int k = 0; k < curve_tessellation; k++)
+        for (int k = 0; k <= curve_tessellation; k++)
         {
             float t2 = t * t;
             float t3 = t * t2;
@@ -234,13 +236,14 @@ TriangleMesh *BSplineCurve::OutputTriangles(ArgParser *args)
             B_bsplne.Transform(tvec);
             G.Transform(tvec);
             float theta = 0;
-            for (int n = 0; n < revolution_tessellation; n++)
+            for (int n = 0; n <= revolution_tessellation; n++)
             {
                 float x = cos(theta) * tvec.x() + sin(theta) * tvec.z();
                 float y = tvec.y();
                 float z = -sin(theta) * tvec.x() + cos(theta) * tvec.z();
 
                 triangleNet->SetVertex(n, k + i * curve_tessellation, Vec3f(x, y, z));
+                theta += d_revo;
             }
             t += d_curve;
         }
@@ -248,7 +251,7 @@ TriangleMesh *BSplineCurve::OutputTriangles(ArgParser *args)
     return triangleNet;
 }
 
-void BSplineCurve::drawCurvs(ArgParser *args)
+void BSplineCurve::drawCurves(ArgParser *args)
 {
     glLineWidth(4);
     glColor3f(0, 1, 0);
@@ -259,7 +262,7 @@ void BSplineCurve::drawCurvs(ArgParser *args)
 
     float d = 1.0f / tessellation;
 
-    for (int i = 0; i < num_vertices; i += 3)
+    for (int i = 0; i < num_vertices - 3; i++)
     {
         Matrix G;
         for (int j = 0; j < 4; j++)
@@ -269,7 +272,7 @@ void BSplineCurve::drawCurvs(ArgParser *args)
             G.Set(j, 2, getVertex(i + j).z());
         }
         float t = 0;
-        for (int k = 0; k < num_vertices; k++)
+        for (int k = 0; k <= tessellation; k++)
         {
             float t2 = t * t;
             float t3 = t * t2;
@@ -277,6 +280,7 @@ void BSplineCurve::drawCurvs(ArgParser *args)
             B_bsplne.Transform(tvec);
             G.Transform(tvec);
             glVertex3f(tvec.x(), tvec.y(), tvec.z());
+            t += d;
         }
     }
     glEnd();

@@ -12,7 +12,7 @@ class Spline
 {
 public:
     Spline() {}
-
+    virtual void set(int i, const Vec3f &v) {}
     // FOR VISUALIZATION
     virtual void Paint(ArgParser *args) = 0;
 
@@ -32,7 +32,7 @@ public:
     // FOR GENERATING TRIANGLES
     virtual TriangleMesh *OutputTriangles(ArgParser *args) { return nullptr; };
 
-    protected:
+protected:
     static Matrix B_bezier;
     static Matrix B_bsplne;
 };

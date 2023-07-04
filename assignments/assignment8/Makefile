@@ -34,7 +34,7 @@ depend:
 	$(CC) $(INCLUDE) -E -M $(SRCS) > Makefile.depend
 
 clean: 
-	-rm -f *~ *bak *.o  core.* Makefile.depend $(EXE) 
+	-rm -f *~ *bak src/*.o  core.* Makefile.depend $(EXE) 
 
 # ===============================================================
 # compilation rules
