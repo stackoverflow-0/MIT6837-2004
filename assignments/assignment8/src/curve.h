@@ -23,6 +23,10 @@ public:
     virtual int getNumVertices() { return num_vertices; };
     virtual Vec3f getVertex(int i) { return vertexs[i]; };
 
+    virtual void moveControlPoint(int selectedPoint, float x, float y);
+    virtual void addControlPoint(int selectedPoint, float x, float y);
+    virtual void deleteControlPoint(int selectedPoint);
+
 protected:
     int num_vertices{0};
     std::vector<Vec3f> vertexs;
@@ -31,7 +35,7 @@ protected:
 
     void drawPoints();
 
-    virtual void drawCurves(ArgParser *args);
+    virtual void drawCurves(ArgParser *args) = 0;
 };
 
 class BezierCurve : public Curve
@@ -39,12 +43,22 @@ class BezierCurve : public Curve
 public:
     BezierCurve(int num_vertices) : Curve(num_vertices) {}
 
-    virtual void OutputBezier(FILE *file){};
-    virtual void OutputBSpline(FILE *file){};
+    virtual void OutputBezier(FILE *file);
+    virtual void OutputBSpline(FILE *file);
 
-    virtual void moveControlPoint(int selectedPoint, float x, float y);
-    virtual void addControlPoint(int selectedPoint, float x, float y);
-    virtual void deleteControlPoint(int selectedPoint);
+    virtual TriangleMesh *OutputTriangles(ArgParser *args);
+
+private:
+    void drawCurvs(ArgParser *args);
+};
+
+class BSplineCurve : public Curve
+{
+public:
+    BSplineCurve(int num_vertices) : Curve(num_vertices) {}
+
+    virtual void OutputBezier(FILE *file);
+    virtual void OutputBSpline(FILE *file);
 
     virtual TriangleMesh *OutputTriangles(ArgParser *args) { return nullptr; };
 
