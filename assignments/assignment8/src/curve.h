@@ -60,7 +60,7 @@ public:
     virtual void OutputBezier(FILE *file);
     virtual void OutputBSpline(FILE *file);
 
-    virtual TriangleMesh *OutputTriangles(ArgParser *args) { return nullptr; };
+    virtual TriangleMesh *OutputTriangles(ArgParser *args);
 
 private:
     void drawCurvs(ArgParser *args);

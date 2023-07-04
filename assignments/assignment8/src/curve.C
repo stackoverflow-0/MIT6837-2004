@@ -204,6 +204,50 @@ void BSplineCurve::OutputBSpline(FILE *file)
     }
 }
 
+TriangleMesh *BSplineCurve::OutputTriangles(ArgParser *args)
+{
+    int curve_tessellation = args->curve_tessellation;
+
+    float d_curve = 1.0f / float(curve_tessellation);
+
+    int revolution_tessellation = args->revolution_tessellation;
+
+    float d_revo = 1.0f / float(revolution_tessellation);
+
+    TriangleNet *triangleNet = new TriangleNet(revolution_tessellation, (num_vertices - 3) * curve_tessellation);
+
+    for (int i = 0; i < num_vertices; i += 3)
+    {
+        Matrix G;
+        for (int j = 0; j < 4; j++)
+        {
+            G.Set(j, 0, getVertex(i + j).x());
+            G.Set(j, 1, getVertex(i + j).y());
+            G.Set(j, 2, getVertex(i + j).z());
+        }
+        float t = 0;
+        for (int k = 0; k < curve_tessellation; k++)
+        {
+            float t2 = t * t;
+            float t3 = t * t2;
+            Vec4f tvec(t3, t2, t, 1);
+            B_bsplne.Transform(tvec);
+            G.Transform(tvec);
+            float theta = 0;
+            for (int n = 0; n < revolution_tessellation; n++)
+            {
+                float x = cos(theta) * tvec.x() + sin(theta) * tvec.z();
+                float y = tvec.y();
+                float z = -sin(theta) * tvec.x() + cos(theta) * tvec.z();
+
+                triangleNet->SetVertex(n, k + i * curve_tessellation, Vec3f(x, y, z));
+            }
+            t += d_curve;
+        }
+    }
+    return triangleNet;
+}
+
 void BSplineCurve::drawCurvs(ArgParser *args)
 {
     glLineWidth(4);
