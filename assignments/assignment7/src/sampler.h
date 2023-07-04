@@ -4,9 +4,9 @@
 
 enum SamplerType
 {
-    random,
-    uniform,
-    jitterd
+    RandomSamplerType,
+    UniformSamplerType,
+    JitterdSamplerType
 };
 
 class Sampler
@@ -41,8 +41,9 @@ public:
         int sample_side = sqrt(sample_num);
         int xoffset = n / sample_side;
         int yoffset = n % sample_side;
-        return Vec2f(xoffset * sample_side + drand48() / float(sample_side),
-                     yoffset * sample_side + drand48() / float(sample_side));
+        float step = 1.0f / sample_side;
+        return Vec2f((xoffset + drand48()) * step,
+                     (yoffset + drand48()) * step);
     }
 };
 
@@ -56,7 +57,8 @@ public:
         int sample_side = sqrt(sample_num);
         int xoffset = n / sample_side;
         int yoffset = n % sample_side;
-        return Vec2f(xoffset * sample_side,
-                     yoffset * sample_side);
+        float step = 1.0f / sample_side;
+        return Vec2f(float(xoffset) * step,
+                     float(yoffset) * step);
     }
 };

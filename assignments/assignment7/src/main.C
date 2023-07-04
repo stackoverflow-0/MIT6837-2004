@@ -6,6 +6,7 @@
 #include "raytracer.h"
 #include "film.h"
 #include "sampler.h"
+#include "filter.h"
 
 void render(void);
 void RayTraceRender(float x, float y);
@@ -35,12 +36,18 @@ int nx = 0, ny = 0, nz = 0;
 
 bool stats = false;
 
-bool render_samples = false;
 char *render_sample_file = nullptr;
 int sample_zoom = 1;
 
-SamplerType samplerType = SamplerType::uniform;
+SamplerType samplerType = SamplerType::UniformSamplerType;
 int sample_num = 1;
+
+FilterType filtertype = FilterType::BoxFilterType;
+// for gaussian , filter_radius means sigma
+float filter_radius = 0;
+
+char *render_filter_file = nullptr;
+int zoom_factor = 1;
 
 RayTracer *rayTracer = nullptr;
 
@@ -100,15 +107,15 @@ void render(void)
 
     switch (samplerType)
     {
-    case SamplerType::uniform:
+    case SamplerType::UniformSamplerType:
         /* code */
         sampler = new UniormSampler(sample_num);
         break;
-    case SamplerType::random:
+    case SamplerType::RandomSamplerType:
         /* code */
         sampler = new RandomSampler(sample_num);
         break;
-    case SamplerType::jitterd:
+    case SamplerType::JitterdSamplerType:
         /* code */
         sampler = new JitterdSampler(sample_num);
         break;
@@ -116,7 +123,24 @@ void render(void)
         break;
     }
 
-    Film film(width, height, 5);
+    Filter *filter;
+
+    switch (filtertype)
+    {
+    case FilterType::BoxFilterType:
+        filter = new BoxFilter(filter_radius);
+        break;
+    case FilterType::TentFilterType:
+        filter = new TentFilter(filter_radius);
+        break;
+    case FilterType::GaussianFliterType:
+        filter = new GaussianFilter(filter_radius);
+        break;
+    default:
+        break;
+    }
+
+    Film * film = new Film(width, height, sample_num);
 
     // RayTracer rayTracer(scene, max_bounces, cutoff_weight);
     if (nx != 0)
@@ -128,13 +152,13 @@ void render(void)
 
     for (int i = 0; i < width; ++i)
     {
-        if (i % 100 == 0)
+        if (i % 10 == 0)
         {
-            printf("at %.2f ... \n", float(i) / float(width) * 100);
+            printf("sample at %.2f %% ... \n", float(i) / float(width) * 100);
         }
         for (int j = 0; j < height; ++j)
         {
-            for (int s = 0; s < film.getNumSamples(); ++s)
+            for (int s = 0; s < film->getNumSamples(); ++s)
             {
                 RayTracingStats::IncrementNumNonShadowRays();
                 Vec2f random_offset = sampler->getSamplePosition(s);
@@ -144,20 +168,45 @@ void render(void)
                 float tmin = 0.001f;
                 Hit hit(INFINITY, nullptr, Vec3f(0, 0, 0));
                 Vec3f color = rayTracer->traceRay(ray, tmin, 0, 1.0, hit);
-                film.setSample(x, y, s, random_offset, color);
-                // image.SetPixel(i, j, color);
+                film->setSample(i, j, s, random_offset, color);
+                // image.SetPixel(i, j, film->getSample(x,y,s).getColor());
             }
         }
     }
-    if (render_samples)
-        film.renderSamples(render_sample_file, sample_zoom);
-    // if (output_file != nullptr)
-    //     image.SaveTGA(output_file);
+
+    for (int i = 0; i < width; ++i)
+    {
+        if (i % 10 == 0)
+        {
+            printf("filter at %.2f %% ... \n", float(i) / float(width) * 100);
+        }
+        for (int j = 0; j < height; ++j)
+        {
+            image.SetPixel(i, j, filter->getColor(i, j, film));
+            // cout << image.GetPixel(i, j) << endl;
+        }
+    }
+
+    if (render_sample_file != nullptr)
+    {
+        film->renderSamples(render_sample_file, sample_zoom);
+    }
+
+    if (render_filter_file != nullptr)
+    {
+        film->renderFilter(render_filter_file, zoom_factor, filter);
+    }
+
+    if (output_file != nullptr)
+    {
+        image.SaveTGA(output_file);
+    }
 
     if (stats)
         RayTracingStats::PrintStatistics();
 
     delete sampler;
+    delete filter;
 }
 
 void parser(int argc, char **argv)
@@ -226,8 +275,6 @@ void parser(int argc, char **argv)
         }
         else if (!strcmp(argv[i], "-gouraud"))
         {
-            i++;
-            assert(i < argc);
             gouraud = true;
         }
         else if (!strcmp(argv[i], "-bounces"))
@@ -256,14 +303,10 @@ void parser(int argc, char **argv)
         }
         else if (!strcmp(argv[i], "-visualize_grid"))
         {
-            i++;
-            assert(i < argc);
             visualize_grid = true;
         }
         else if (!strcmp(argv[i], "-stats"))
         {
-            i++;
-            assert(i < argc);
             stats = true;
         }
         else if (!strcmp(argv[i], "-render_samples"))
@@ -279,19 +322,52 @@ void parser(int argc, char **argv)
         {
             i++;
             assert(i < argc);
-            samplerType = SamplerType::random;
+            samplerType = SamplerType::RandomSamplerType;
+            sample_num = atoi(argv[i]);
         }
         else if (!strcmp(argv[i], "-uniform_samples"))
         {
             i++;
             assert(i < argc);
-            samplerType = SamplerType::uniform;
+            samplerType = SamplerType::UniformSamplerType;
+            sample_num = atoi(argv[i]);
         }
         else if (!strcmp(argv[i], "-jittered_samples"))
         {
             i++;
             assert(i < argc);
-            samplerType = SamplerType::jitterd;
+            samplerType = SamplerType::JitterdSamplerType;
+            sample_num = atoi(argv[i]);
+        }
+        else if (!strcmp(argv[i], "-render_filter"))
+        {
+            i++;
+            assert(i < argc);
+            render_filter_file = argv[i];
+            i++;
+            assert(i < argc);
+            zoom_factor = atoi(argv[i]);
+        }
+        else if (!strcmp(argv[i], "-box_filter"))
+        {
+            i++;
+            assert(i < argc);
+            filtertype = FilterType::BoxFilterType;
+            filter_radius = atof(argv[i]);
+        }
+        else if (!strcmp(argv[i], "-tent_filter"))
+        {
+            i++;
+            assert(i < argc);
+            filtertype = FilterType::TentFilterType;
+            filter_radius = atof(argv[i]);
+        }
+        else if (!strcmp(argv[i], "-gaussian_filter"))
+        {
+            i++;
+            assert(i < argc);
+            filtertype = FilterType::GaussianFliterType;
+            filter_radius = atof(argv[i]);
         }
     }
 }

@@ -3,6 +3,12 @@
 #include "vectors.h"
 #include "film.h"
 
+enum FilterType {
+    BoxFilterType,
+    TentFilterType,
+    GaussianFliterType
+};
+
 class Filter
 {
 public:
@@ -24,8 +30,8 @@ class BoxFilter : public Filter
 public:
     BoxFilter(int radius) : radius(radius)
     {
-        int side = radius << 1 + 1;
-        total_weight = float(side * side);
+        int side = radius * 2 + 1;
+        // total_weight = float(side * side);
     }
 
     virtual float getWeight(float x, float y);
@@ -34,7 +40,7 @@ public:
 
 private:
     int radius{0};
-    float total_weight{0};
+    // float total_weight{0};
 };
 
 class TentFilter : public Filter
@@ -42,15 +48,15 @@ class TentFilter : public Filter
 public:
     TentFilter(int radius) : radius(radius)
     {
-        for (int i = -radius; i <= radius; ++i)
-        {
-            for (int j = -radius; j <= radius; ++j)
-            {
-                float x = float(i) / float(radius);
-                float y = float(j) / float(radius);
-                total_weight += 1.0f - max(fabs(x), fabs(y) / float(radius));
-            }
-        }
+        // for (int i = -radius; i <= radius; ++i)
+        // {
+        //     for (int j = -radius; j <= radius; ++j)
+        //     {
+        //         float x = float(i) / float(radius);
+        //         float y = float(j) / float(radius);
+        //         total_weight +=  radius > 0 ? 1 - max(fabs(x), fabs(y)) / float(radius) : 1.0f;
+        //     }
+        // }
     }
 
     virtual float getWeight(float x, float y);
@@ -59,7 +65,7 @@ public:
 
 private:
     int radius{0};
-    float total_weight{0};
+    // float total_weight{0};
 };
 
 class GaussianFilter : public Filter
@@ -67,16 +73,17 @@ class GaussianFilter : public Filter
 public:
     GaussianFilter(float sigma) : sigma(sigma)
     {
+        assert(sigma > 0);
         radius = int(2 * sigma);
-        for (int i = -radius; i <= radius; ++i)
-        {
-            for (int j = -radius; j <= radius; ++j)
-            {
-                float x = float(i) / float(radius);
-                float y = float(j) / float(radius);
-                total_weight += expf(-(x * x + y * y) / (2 * sigma));
-            }
-        }
+        // for (int i = -radius; i <= radius; ++i)
+        // {
+        //     for (int j = -radius; j <= radius; ++j)
+        //     {
+        //         float x = float(i) / float(radius);
+        //         float y = float(j) / float(radius);
+        //         total_weight += expf(-(x * x + y * y) / (2 * sigma));
+        //     }
+        // }
     }
 
     virtual float getWeight(float x, float y);
@@ -86,5 +93,5 @@ public:
 private:
     float sigma{1.0f};
     int radius {0};
-    float total_weight {0};
+    // float total_weight {0};
 };
