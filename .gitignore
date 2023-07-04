@@ -5,3 +5,4 @@
 *.txt
 Makefile.depend
 raytracer
+curve_editor
