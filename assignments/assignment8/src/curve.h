@@ -2,29 +2,52 @@
 
 #include "spline.h"
 
+#include <vector>
+
+class ArgParser;
+
+class TriangleMesh;
+
 class Curve : public Spline
 {
 public:
-    Curve(int num_vertices) : Spline(num_vertices){}
+    Curve(int num_vertices) : num_vertices(num_vertices)
+    {
+        vertexs.resize(num_vertices);
+    }
 
     // FOR VISUALIZATION
     virtual void Paint(ArgParser *args);
 
-    // FOR CONVERTING BETWEEN SPLINE TYPES
-    virtual void OutputBezier(FILE *file);
-    virtual void OutputBSpline(FILE *file);
-
     // FOR CONTROL POINT PICKING
-    virtual int getNumVertices();
-    virtual Vec3f getVertex(int i);
+    virtual int getNumVertices() { return num_vertices; };
+    virtual Vec3f getVertex(int i) { return vertexs[i]; };
 
-    // FOR EDITING OPERATIONS
+protected:
+    int num_vertices{0};
+    std::vector<Vec3f> vertexs;
+
+    void drawLines();
+
+    void drawPoints();
+
+    virtual void drawCurves(ArgParser *args);
+};
+
+class BezierCurve : public Curve
+{
+public:
+    BezierCurve(int num_vertices) : Curve(num_vertices) {}
+
+    virtual void OutputBezier(FILE *file){};
+    virtual void OutputBSpline(FILE *file){};
+
     virtual void moveControlPoint(int selectedPoint, float x, float y);
     virtual void addControlPoint(int selectedPoint, float x, float y);
     virtual void deleteControlPoint(int selectedPoint);
 
-    // FOR GENERATING TRIANGLES
-    virtual TriangleMesh *OutputTriangles(ArgParser *args);
+    virtual TriangleMesh *OutputTriangles(ArgParser *args) { return nullptr; };
 
-
+private:
+    void drawCurvs(ArgParser *args);
 };

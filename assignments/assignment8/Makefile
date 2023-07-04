@@ -3,14 +3,14 @@
 
 # ===============================================================
 
-SRCS 	 	= main.C \
-		  matrix.C \
-		  glCanvas.C \
-		  spline_parser.C \
-		  triangle_mesh.C \
-		  spline.C \
-		  curve.C \
-		  surface.C
+SRCS 	 	= src/main.C \
+		  src/matrix.C \
+		  src/glCanvas.C \
+		  src/spline_parser.C \
+		  src/triangle_mesh.C \
+		  src/spline.C \
+		  src/curve.C \
+		  src/surface.C
 
 
 # ===============================================================
