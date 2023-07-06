@@ -3,8 +3,7 @@
 #include "vectors.h"
 #include <vector>
 
-bool Sphere::intersect(const Ray &r, Hit &h, float tmin)
-{
+bool Sphere::intersect(const Ray &r, Hit &h, float tmin) {
     Vec3f orig = r.getOrigin() - center;
     Vec3f dir = r.getDirection();
     float a = dir.Dot3(dir);
